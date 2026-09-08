@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Open Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+
+  /* CSI Tamil Parish Dubai palette — deep maroon primary (#581601)
+     with a warm orange-red accent (#F03C02) on white. */
+  --color-brand-50: #fbf4f1;
+  --color-brand-100: #f6e4dc;
+  --color-brand-200: #ecc5b6;
+  --color-brand-300: #dc9a83;
+  --color-brand-400: #c56b4d;
+  --color-brand-500: #a8482a;
+  --color-brand-600: #8a3419;
+  --color-brand-700: #6e2410;
+  --color-brand-800: #581601;
+  --color-brand-900: #3f1002;
+
+  /* Accent (orange-red) */
+  --color-warm-50: #fff3ee;
+  --color-warm-100: #ffe1d5;
+  --color-warm-500: #f03c02;
+  --color-warm-600: #d13102;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-stone-700 antialiased;
+}
