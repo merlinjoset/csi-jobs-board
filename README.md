@@ -1,95 +1,61 @@
-# CSI Tamil Parish Dubai — Jobs Board (Prototype)
+# CSI Job Portal (Laravel)
 
-A community **referral job board** for the parish. Members share job openings
-they know about — at their workplace, their own business, or through their
-network — to help fellow members find good work. It is *not* the church's own
-staff vacancies.
+A job portal with two roles, resume upload, and resume-based job suggestions.
+Built with **Laravel 13**, **Blade + Tailwind**, and **MariaDB (MySQL)**, managed
+through **phpMyAdmin**.
 
-Built with **Vite + React + Tailwind CSS** on the front end and an
-**Express + PostgreSQL (Neon)** API on the back end.
+## Roles
 
-## Architecture
+- **Job Seeker**: anyone can register, upload a resume (PDF / DOCX / TXT), and the
+  portal parses it, detects skills, and suggests the best-matching jobs. Seekers
+  apply to jobs with their latest resume.
+- **Job Provider**: registers, posts jobs (with skills), and sees every applicant
+  for their jobs, including each applicant's resume and detected skills. Providers
+  can shortlist or reject.
 
-```
-Frontend (Vite/React, :5173)  ──/api──▶  Express API (:3001)  ──▶  Neon Postgres
-   src/                                    server/
-```
+## How matching works
 
-The Vite dev server proxies `/api/*` to the Express server (see `vite.config.js`).
+On upload, `App\Services\ResumeService` extracts text (smalot/pdfparser for PDF,
+ZipArchive for DOCX, plain read for TXT), detects known skills, and stores them.
+Suggestions score each open job by skill overlap (3 points per shared skill) plus
+keyword hits from the job title/category/skills found in the resume text.
 
-## Getting started
+## Running it
 
-You need **two** processes running.
+Prerequisites already set up on this machine: PHP 8.4 (with a `php.ini` enabling
+pdo_mysql, openssl, mbstring, zip, gd, curl), Composer, and a MariaDB service.
 
-**1. Backend** (first time, create the tables + seed data):
-
-```bash
-cd server
-npm install
-npm run init-db      # creates users / jobs / shortlists tables and seeds them
-npm start            # API on http://localhost:3001
-```
-
-**2. Frontend** (in a second terminal):
-
-```bash
-npm install
-npm run dev          # app on http://localhost:5173
+```powershell
+# from csi-portal/
+php artisan migrate:fresh --seed   # build + seed the database (csi_portal)
+php artisan serve --port=8010      # app at http://127.0.0.1:8010
 ```
 
-Open http://localhost:5173.
+- **App**: http://127.0.0.1:8010
+- **phpMyAdmin**: http://127.0.0.1:8081 (login root / root)
+- **Database**: MariaDB `csi_portal` on 127.0.0.1:3306 (root / root), see `.env`
 
-### Configuration
+## Demo accounts (password: `password`)
 
-The database connection lives in `server/.env`:
+| Role     | Email                   |
+| -------- | ----------------------- |
+| Provider | provider@example.com    |
+| Provider | provider2@example.com   |
+| Seeker   | seeker@example.com      |
+| Seeker   | seeker2@example.com     |
 
-```
-DATABASE_URL=postgres://…   # Neon connection string (sslmode=require)
-PORT=3001
-```
+## Key files
 
-`server/.env` is gitignored. **The current credential was shared in plaintext —
-rotate it in the Neon console before any real use.**
+- `app/Models/` — User, JobPost, Resume, Application
+- `app/Services/ResumeService.php` — text extraction, skill detection, matching
+- `app/Http/Controllers/` — Auth, Job (public), Seeker, Provider, Resume
+- `database/migrations/2026_10_01_120000_create_portal_schema.php` — schema
+- `database/seeders/DatabaseSeeder.php` — demo data
+- `resources/views/` — Blade views (layouts, auth, jobs, seeker, provider)
 
-## Demo accounts
+## Notes
 
-| Role   | Email                              | Password    |
-| ------ | ---------------------------------- | ----------- |
-| Admin  | `admin@csitamilparishdubai.com`    | `admin123`  |
-| Member | `member@csitamilparishdubai.com`   | `member123` |
-
-## Features
-
-- **Browse** — searchable, filterable board of approved openings.
-- **Share an opportunity** — signed-in members post an opening; it arrives as
-  **pending** and only appears once an admin approves it.
-- **Job detail** — full posting, the member's referral note, and an
-  "Express interest" action revealing the contact email.
-- **Shortlist** — signed-in members bookmark jobs; saved per user in the DB.
-- **Admin dashboard** — two tabs:
-  - **Postings** — monitor every posting: stats, a review queue
-    (Approve / Reject), and **Close / Reopen / Remove** for live postings.
-    Closing keeps the record but drops it from the public board.
-  - **Users** — manage accounts: view members/admins with activity counts,
-    add a user, change roles (member ↔ admin), and remove accounts. Guards
-    prevent demoting/deleting the last admin or deleting your own account.
-
-## Database schema
-
-- `users(id, name, email, password, role)`
-- `jobs(id, title, org, posted_by, shared_note, category, type, location, pay,
-  posted_at, description, requirements, contact_email, tags, status, created_at)`
-- `shortlists(user_id, job_id, created_at)`
-
-Job `status` is one of `pending | approved | rejected | closed`. The public
-board shows only `approved`.
-
-## Prototype notes / next steps
-
-Passwords are stored in plaintext and prototype auth uses a simple user-id
-header — fine for a demo, **not** production. Before going live you'd want:
-
-- Hashed passwords + real sessions/JWT and self-serve member sign-up
-- Email/in-app notifications when someone expresses interest
-- Posting expiry and abuse reporting
-- Deployment (e.g. API on Render/Fly, static frontend on Netlify/Vercel)
+- Tailwind is loaded via the Play CDN for convenience; swap for a built asset
+  pipeline before production.
+- Resume files are stored privately under `storage/app/private/resumes` and served
+  only to the owning seeker or a provider who received that resume as an application.
