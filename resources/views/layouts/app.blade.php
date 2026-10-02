@@ -32,7 +32,12 @@
             <nav class="flex items-center gap-1 text-sm sm:gap-2">
                 <a href="{{ route('home') }}" class="rounded-lg px-3 py-2 font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900">Browse jobs</a>
                 @auth
-                    @if (auth()->user()->isProvider())
+                    @if (auth()->user()->isAdmin())
+                        <a href="{{ route('admin.dashboard') }}" class="rounded-lg px-3 py-2 font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900">Dashboard</a>
+                        <a href="{{ route('admin.users') }}" class="rounded-lg px-3 py-2 font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900">Users</a>
+                        <a href="{{ route('admin.jobs') }}" class="rounded-lg px-3 py-2 font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900">Jobs</a>
+                        <a href="{{ route('admin.applications') }}" class="rounded-lg px-3 py-2 font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900">Applications</a>
+                    @elseif (auth()->user()->isProvider())
                         <a href="{{ route('provider.dashboard') }}" class="rounded-lg px-3 py-2 font-medium text-stone-600 hover:bg-stone-100 hover:text-stone-900">Dashboard</a>
                         <a href="{{ route('provider.jobs.create') }}" class="rounded-lg bg-brand-800 px-4 py-2 font-semibold text-white hover:bg-brand-900">+ Post a job</a>
                     @else

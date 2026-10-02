@@ -21,7 +21,7 @@ class ResumeController extends Controller
             ->whereHas('jobPost', fn ($q) => $q->where('user_id', $user->id))
             ->exists();
 
-        abort_unless($isOwner || $providerCanView, 403, 'You are not allowed to view this resume.');
+        abort_unless($isOwner || $providerCanView || $user->isAdmin(), 403, 'You are not allowed to view this resume.');
         abort_unless(Storage::exists($resume->path), 404, 'Resume file is missing.');
 
         return response()->file(Storage::path($resume->path), [

@@ -43,6 +43,11 @@ class User extends Authenticatable
         return $this->role === 'seeker';
     }
 
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
     // Jobs posted by this provider.
     public function jobPosts(): HasMany
     {

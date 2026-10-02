@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\ProviderController;
@@ -26,10 +27,26 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 Route::middleware('auth')->group(function () {
     // Role-aware dashboard dispatcher
     Route::get('/dashboard', function () {
-        return Auth::user()->isProvider()
+        $user = Auth::user();
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+        return $user->isProvider()
             ? redirect()->route('provider.dashboard')
             : redirect()->route('seeker.dashboard');
     })->name('dashboard');
+
+    // Admin backend
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/users', [AdminController::class, 'users'])->name('users');
+        Route::post('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('users.role');
+        Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('users.delete');
+        Route::get('/jobs', [AdminController::class, 'jobs'])->name('jobs');
+        Route::post('/jobs/{job}/toggle', [AdminController::class, 'toggleJob'])->name('jobs.toggle');
+        Route::delete('/jobs/{job}', [AdminController::class, 'deleteJob'])->name('jobs.delete');
+        Route::get('/applications', [AdminController::class, 'applications'])->name('applications');
+    });
 
     // Seeker
     Route::get('/seeker', [SeekerController::class, 'dashboard'])->name('seeker.dashboard');

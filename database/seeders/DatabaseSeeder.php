@@ -16,6 +16,14 @@ class DatabaseSeeder extends Seeder
     {
         $resumes = new ResumeService();
 
+        // ---- Admin (backend) ----
+        User::create([
+            'name' => 'Portal Admin',
+            'email' => 'admin@example.com',
+            'password' => 'password',
+            'role' => 'admin',
+        ]);
+
         // ---- Providers ----
         $provider = User::create([
             'name' => 'Grace Staffing',
