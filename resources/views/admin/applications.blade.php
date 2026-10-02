@@ -29,13 +29,13 @@
                         <td class="px-4 py-3 text-stone-600">{{ $app->jobPost->provider->name }}</td>
                         <td class="px-4 py-3">
                             @if ($app->resume)
-                                <a href="{{ route('resumes.show', $app->resume) }}" target="_blank" class="text-xs font-medium text-brand-700 hover:underline">View</a>
+                                <button type="button" data-resume-url="{{ route('resumes.show', $app->resume) }}" data-resume-name="{{ $app->resume->original_name }}" class="text-xs font-medium text-brand-700 hover:underline">View</button>
                             @else
                                 <span class="text-xs text-stone-400">none</span>
                             @endif
                         </td>
                         <td class="px-4 py-3">
-                            @php $tone = ['applied'=>'bg-stone-100 text-stone-600','shortlisted'=>'bg-emerald-100 text-emerald-700','rejected'=>'bg-red-100 text-red-700'][$app->status]; @endphp
+                            @php $tone = ['applied'=>'bg-stone-100 text-stone-600','shortlisted'=>'bg-emerald-100 text-emerald-700','interview'=>'bg-brand-100 text-brand-700','rejected'=>'bg-red-100 text-red-700'][$app->status] ?? 'bg-stone-100 text-stone-600'; @endphp
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-medium capitalize {{ $tone }}">{{ $app->status }}</span>
                         </td>
                         <td class="px-4 py-3 text-stone-500">{{ $app->created_at->diffForHumans() }}</td>

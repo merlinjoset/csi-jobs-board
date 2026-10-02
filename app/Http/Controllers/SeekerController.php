@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ApplicationMail;
 use App\Models\Application;
 use App\Models\JobPost;
 use App\Models\Resume;
 use App\Services\ResumeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class SeekerController extends Controller
@@ -78,13 +80,20 @@ class SeekerController extends Controller
             return back()->with('error', 'You have already applied to this job.');
         }
 
-        Application::create([
+        $application = Application::create([
             'job_post_id' => $job->id,
             'user_id' => $user->id,
             'resume_id' => $resume->id,
             'cover_note' => $request->input('cover_note'),
             'status' => 'applied',
         ]);
+
+        // Notify the provider (a mail error must never block the application).
+        try {
+            Mail::to($job->provider->email)->send(new ApplicationMail($application, 'received'));
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return redirect()->route('jobs.show', $job)->with('status', 'Application submitted with your latest resume.');
     }

@@ -13,7 +13,22 @@ class Application extends Model
         'resume_id',
         'cover_note',
         'status',
+        'provider_message',
+        'interview_at',
+        'interview_mode',
+        'interview_location',
+        'interview_note',
     ];
+
+    protected function casts(): array
+    {
+        return ['interview_at' => 'datetime'];
+    }
+
+    public function hasInterview(): bool
+    {
+        return $this->status === 'interview' && $this->interview_at !== null;
+    }
 
     public function jobPost(): BelongsTo
     {

@@ -46,6 +46,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/jobs/{job}/toggle', [AdminController::class, 'toggleJob'])->name('jobs.toggle');
         Route::delete('/jobs/{job}', [AdminController::class, 'deleteJob'])->name('jobs.delete');
         Route::get('/applications', [AdminController::class, 'applications'])->name('applications');
+        Route::get('/email', [AdminController::class, 'emailSettings'])->name('email');
+        Route::post('/email/test', [AdminController::class, 'sendTestEmail'])->name('email.test');
     });
 
     // Seeker
@@ -61,6 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/provider/jobs/{job}/toggle', [ProviderController::class, 'toggle'])->name('provider.jobs.toggle');
     Route::get('/provider/jobs/{job}/applicants', [ProviderController::class, 'applicants'])->name('provider.jobs.applicants');
     Route::post('/applications/{application}/status', [ProviderController::class, 'updateApplication'])->name('provider.applications.status');
+    Route::post('/applications/{application}/interview', [ProviderController::class, 'scheduleInterview'])->name('provider.applications.interview');
 
     // Resume file (access-controlled)
     Route::get('/resumes/{resume}', [ResumeController::class, 'show'])->name('resumes.show');

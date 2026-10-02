@@ -13,7 +13,7 @@
                 <div class="mt-3 rounded-lg bg-stone-50 p-3 text-sm">
                     <p class="font-medium text-stone-800">{{ $resume->original_name }}</p>
                     <p class="text-xs text-stone-500">Uploaded {{ $resume->created_at->diffForHumans() }}</p>
-                    <a href="{{ route('resumes.show', $resume) }}" target="_blank" class="mt-1 inline-block text-xs font-medium text-brand-700 hover:underline">View file</a>
+                    <button type="button" data-resume-url="{{ route('resumes.show', $resume) }}" data-resume-name="{{ $resume->original_name }}" class="mt-1 inline-block text-xs font-medium text-brand-700 hover:underline">View file</button>
                 </div>
                 @if ($resume->skillList())
                     <div class="mt-3">

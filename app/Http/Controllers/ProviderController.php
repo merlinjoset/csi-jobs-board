@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ApplicationMail;
 use App\Models\Application;
 use App\Models\JobPost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class ProviderController extends Controller
 {
@@ -80,9 +82,44 @@ class ProviderController extends Controller
         $this->ensureProvider();
         abort_unless($application->jobPost->user_id === Auth::id(), 403);
 
-        $request->validate(['status' => ['required', 'in:applied,shortlisted,rejected']]);
-        $application->update(['status' => $request->input('status')]);
+        $data = $request->validate([
+            'status' => ['required', 'in:applied,shortlisted,rejected'],
+            'provider_message' => ['nullable', 'string', 'max:1000'],
+        ]);
+        $application->update($data);
 
-        return back()->with('status', 'Applicant status updated.');
+        // Email the seeker when they are shortlisted or rejected.
+        if (in_array($data['status'], ['shortlisted', 'rejected'], true)) {
+            try {
+                Mail::to($application->seeker->email)->send(new ApplicationMail($application, $data['status']));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        return back()->with('status', 'Applicant updated. They will see your response (and get an email).');
+    }
+
+    public function scheduleInterview(Request $request, Application $application)
+    {
+        $this->ensureProvider();
+        abort_unless($application->jobPost->user_id === Auth::id(), 403);
+
+        $data = $request->validate([
+            'interview_at' => ['required', 'date', 'after:now'],
+            'interview_mode' => ['required', 'in:In-person,Online,Phone'],
+            'interview_location' => ['nullable', 'string', 'max:255'],
+            'interview_note' => ['nullable', 'string', 'max:1000'],
+        ]);
+        $data['status'] = 'interview';
+        $application->update($data);
+
+        try {
+            Mail::to($application->seeker->email)->send(new ApplicationMail($application, 'interview'));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return back()->with('status', 'Interview scheduled. The applicant will see the details and receive an email.');
     }
 }
